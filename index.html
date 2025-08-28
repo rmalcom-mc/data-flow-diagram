@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -15,6 +15,11 @@
             border: 2px solid #4ade80; /* green-400 */
             background-color: #f0fdf4; /* green-50 */
             color: #166534; /* green-800 */
+        }
+        .dfd-api {
+            border: 2px solid #818cf8; /* indigo-400 */
+            background-color: #eef2ff; /* indigo-50 */
+            color: #3730a3; /* indigo-800 */
         }
         .dfd-process {
             border: 2px solid #60a5fa; /* blue-400 */
@@ -67,51 +72,68 @@
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800 overflow-hidden">
-    <div class="absolute top-0 left-0 p-4 bg-white/80 backdrop-blur-sm rounded-br-xl shadow-lg">
+    <div class="absolute top-0 left-0 p-4 bg-white/80 backdrop-blur-sm rounded-br-xl shadow-lg z-20">
         <h1 class="text-xl font-bold text-gray-700">Data Pipeline DFD</h1>
-        <p class="text-sm text-gray-500">Google Sheets to Snowflake</p>
+        <p class="text-sm text-gray-500">Multiple Sources to Snowflake</p>
     </div>
     <div id="canvas" class="relative w-screen h-screen">
         <!-- DFD Elements will be dynamically positioned -->
         <div id="E1" class="dfd-element dfd-entity absolute w-48 h-24 rounded-lg p-2 flex flex-col justify-center items-center text-center">
-            <div class="font-bold">Google Sheets</div>
+            <div class="font-bold">Sheet: Marriott BOM</div>
             <div class="text-xs">(Source)</div>
         </div>
-        <div id="P1" class="dfd-element dfd-process absolute w-48 h-24 rounded-lg p-2 flex flex-col justify-center items-center text-center">
-            <div class="font-bold">P1: Query & Extract</div>
-            <div class="text-xs">(Google Colab)</div>
+        <div id="E2" class="dfd-element dfd-entity absolute w-48 h-24 rounded-lg p-2 flex flex-col justify-center items-center text-center">
+            <div class="font-bold">Sheet: Marriott Spend</div>
+            <div class="text-xs">(Source)</div>
         </div>
-        <div id="P2" class="dfd-element dfd-process absolute w-48 h-24 rounded-lg p-2 flex flex-col justify-center items-center text-center">
-            <div class="font-bold">P2: Load to Staging</div>
+        <div id="E3" class="dfd-element dfd-entity absolute w-48 h-24 rounded-lg p-2 flex flex-col justify-center items-center text-center">
+            <div class="font-bold">Sheet: Vendor Cleanup</div>
+            <div class="text-xs">(Source)</div>
+        </div>
+        <div id="E4" class="dfd-element dfd-api absolute w-48 h-24 rounded-lg p-2 flex flex-col justify-center items-center text-center">
+            <div class="font-bold">HS Projects</div>
+            <div class="text-xs">(API Source)</div>
+        </div>
+        <div id="E6" class="dfd-element dfd-api absolute w-48 h-24 rounded-lg p-2 flex flex-col justify-center items-center text-center">
+            <div class="font-bold">HS Companies</div>
+            <div class="text-xs">(API Source)</div>
+        </div>
+        <div id="E7" class="dfd-element dfd-api absolute w-48 h-24 rounded-lg p-2 flex flex-col justify-center items-center text-center">
+            <div class="font-bold">HS Users</div>
+            <div class="text-xs">(API Source)</div>
+        </div>
+        <div id="E8" class="dfd-element dfd-api absolute w-48 h-24 rounded-lg p-2 flex flex-col justify-center items-center text-center">
+            <div class="font-bold">HS Contacts</div>
+            <div class="text-xs">(API Source)</div>
+        </div>
+
+        <div id="P1" class="dfd-element dfd-process absolute w-48 h-24 rounded-lg p-2 flex flex-col justify-center items-center text-center">
+            <div class="font-bold">P1: Query, Extract & Load</div>
             <div class="text-xs">(Google Colab)</div>
         </div>
         <div id="D1" class="dfd-element dfd-datastore absolute w-48 h-24 p-2 flex flex-col justify-center items-center text-center">
             <div class="font-bold z-10">Bronze Layer</div>
             <div class="text-xs z-10">(Staging)</div>
         </div>
-        <div id="P3" class="dfd-element dfd-process absolute w-48 h-24 rounded-lg p-2 flex flex-col justify-center items-center text-center">
-            <div class="font-bold">P3: Transform & Cleanse</div>
+        <div id="P2" class="dfd-element dfd-process absolute w-48 h-24 rounded-lg p-2 flex flex-col justify-center items-center text-center">
+            <div class="font-bold">P2: Transform & Cleanse</div>
             <div class="text-xs">(Snowflake)</div>
         </div>
         <div id="D2" class="dfd-element dfd-datastore absolute w-48 h-24 p-2 flex flex-col justify-center items-center text-center">
             <div class="font-bold z-10">Silver Layer</div>
             <div class="text-xs z-10">(Cleansed)</div>
         </div>
-        <div id="P4" class="dfd-element dfd-process absolute w-48 h-24 rounded-lg p-2 flex flex-col justify-center items-center text-center">
-            <div class="font-bold">P4: Aggregate & Model</div>
+        <div id="P3" class="dfd-element dfd-process absolute w-48 h-24 rounded-lg p-2 flex flex-col justify-center items-center text-center">
+            <div class="font-bold">P3: Aggregate & Model</div>
             <div class="text-xs">(Snowflake)</div>
         </div>
         <div id="D3" class="dfd-element dfd-datastore absolute w-48 h-24 p-2 flex flex-col justify-center items-center text-center">
             <div class="font-bold z-10">Gold Layer</div>
             <div class="text-xs z-10">(Aggregated)</div>
         </div>
-        <div id="P5" class="dfd-element dfd-process absolute w-48 h-24 rounded-lg p-2 flex flex-col justify-center items-center text-center">
-            <div class="font-bold">P5: Serve Data</div>
-             <div class="text-xs">(BI Tools)</div>
-        </div>
-        <div id="E2" class="dfd-element dfd-entity absolute w-48 h-24 rounded-lg p-2 flex flex-col justify-center items-center text-center">
-            <div class="font-bold">Business Analyst</div>
-            <div class="text-xs">(Destination)</div>
+        <div id="P4" class="dfd-element dfd-process absolute w-48 h-24 rounded-lg p-2 flex flex-col justify-center items-center text-center">
+            <div class="font-bold">P4: Serve Data</div>
+             <div class="text-xs">(Tableau)</div>
         </div>
 
         <!-- SVG for drawing arrows -->
@@ -132,53 +154,51 @@
 
             // Define the connections between elements
             const connections = [
-                { from: 'E1', to: 'P1', label: 'Raw Data' },
-                { from: 'P1', to: 'P2', label: 'Raw Extract' },
-                { from: 'P2', to: 'D1', label: 'Staged Raw Data' },
-                { from: 'D1', to: 'P3', label: 'Staged Raw Data' },
-                { from: 'P3', to: 'D2', label: 'Cleansed Data' },
-                { from: 'D2', to: 'P4', label: 'Cleansed Data' },
-                { from: 'P4', to: 'D3', label: 'Aggregated Data' },
-                { from: 'D3', to: 'P5', label: 'Aggregated Data' },
-                { from: 'P5', to: 'E2', label: 'Reports' },
+                { from: 'E1', to: 'P1', label: 'BOM Data' },
+                { from: 'E2', to: 'P1', label: 'Spend Data' },
+                { from: 'E3', to: 'P1', label: 'Vendor Data' },
+                { from: 'E4', to: 'P1', label: 'Project Data' },
+                { from: 'E6', to: 'P1', label: 'Company Data' },
+                { from: 'E7', to: 'P1', label: 'User Data' },
+                { from: 'E8', to: 'P1', label: 'Contact Data' },
+                { from: 'P1', to: 'D1', label: 'Staged Raw Data' },
+                { from: 'D1', to: 'P2', label: 'Staged Raw Data' },
+                { from: 'P2', to: 'D2', label: 'Cleansed Data' },
+                { from: 'D2', to: 'P3', label: 'Cleansed Data' },
+                { from: 'P3', to: 'D3', label: 'Aggregated Data' },
+                { from: 'D3', to: 'P4', label: 'Aggregated Data' },
             ];
 
             // Initial positioning of elements
-            const positions = {
-                'E1': { top: 50, left: 50 },
-                'P1': { top: 50, left: 300 },
-                'P2': { top: 50, left: 550 },
-                'D1': { top: 200, left: 550 },
-                'P3': { top: 350, left: 550 },
-                'D2': { top: 500, left: 550 },
-                'P4': { top: 650, left: 550 },
-                'D3': { top: 800, left: 550 },
-                'P5': { top: 800, left: 300 },
-                'E2': { top: 800, left: 50 },
-            };
+            const positions = {};
 
             function setInitialPositions() {
                 const screenWidth = window.innerWidth;
                 const screenHeight = window.innerHeight;
-                const colWidth = screenWidth / 5;
-                const rowHeight = screenHeight / 5;
+                
+                const col1 = screenWidth * 0.05;
+                const col2 = screenWidth * 0.25;
+                const col3 = screenWidth * 0.45;
+                const col4 = screenWidth * 0.65;
+                const col5 = screenWidth * 0.85;
 
-                positions['E1'] = { top: rowHeight * 2.5, left: colWidth * 0.2 };
-                positions['P1'] = { top: rowHeight * 1, left: colWidth * 1.2 };
-                positions['P2'] = { top: rowHeight * 1, left: colWidth * 2.2 };
-                
-                positions['D1'] = { top: rowHeight * 2, left: colWidth * 2.2 };
-                positions['P3'] = { top: rowHeight * 2, left: colWidth * 3.2 };
-                
-                positions['D2'] = { top: rowHeight * 3, left: colWidth * 3.2 };
-                positions['P4'] = { top: rowHeight * 3, left: colWidth * 2.2 };
-                
-                positions['D3'] = { top: rowHeight * 4, left: colWidth * 2.2 };
-                positions['P5'] = { top: rowHeight * 4, left: colWidth * 1.2 };
-                positions['E2'] = { top: rowHeight * 2.5, left: colWidth * 4.2 };
+                const rowSpacing = screenHeight / 8;
 
-                // Reposition P5 and E2 to be on the right side
-                positions['P5'] = { top: rowHeight * 2.5, left: colWidth * 3.2 };
+                positions['E1'] = { top: rowSpacing * 1, left: col1 };
+                positions['E2'] = { top: rowSpacing * 2, left: col1 };
+                positions['E3'] = { top: rowSpacing * 3, left: col1 };
+                positions['E4'] = { top: rowSpacing * 4, left: col1 };
+                positions['E6'] = { top: rowSpacing * 5, left: col1 };
+                positions['E7'] = { top: rowSpacing * 6, left: col1 };
+                positions['E8'] = { top: rowSpacing * 7, left: col1 };
+                
+                positions['P1'] = { top: screenHeight/2 - 50, left: col2 };
+                positions['D1'] = { top: screenHeight/2 - 50, left: col3 };
+                positions['P2'] = { top: screenHeight*0.3 - 50, left: col4 };
+                positions['D2'] = { top: screenHeight/2 - 50, left: col4 };
+                positions['P3'] = { top: screenHeight*0.7 - 50, left: col4 };
+                positions['D3'] = { top: screenHeight/2 - 50, left: col5 };
+                positions['P4'] = { top: screenHeight*0.3 - 50, left: col5 };
                 
                 elements.forEach(el => {
                     if (positions[el.id]) {
