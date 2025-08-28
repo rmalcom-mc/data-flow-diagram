@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Data Flow Diagram</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            overscroll-behavior: none;
+        }
+        .dfd-entity {
+            border: 2px solid #4ade80; /* green-400 */
+            background-color: #f0fdf4; /* green-50 */
+            color: #166534; /* green-800 */
+        }
+        .dfd-process {
+            border: 2px solid #60a5fa; /* blue-400 */
+            background-color: #eff6ff; /* blue-50 */
+            color: #1e40af; /* blue-800 */
+        }
+        .dfd-datastore {
+            border: 2px solid #facc15; /* yellow-400 */
+            background-color: #fefce8; /* yellow-50 */
+            color: #854d0e; /* yellow-800 */
+            position: relative;
+            padding-top: 20px;
+            padding-bottom: 20px;
+        }
+        .dfd-datastore::before, .dfd-datastore::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 20px;
+            background-color: #fefce8; /* yellow-50 */
+            border: 2px solid #facc15; /* yellow-400 */
+            border-radius: 50%;
+        }
+        .dfd-datastore::before {
+            top: -10px;
+            border-bottom: none;
+        }
+        .dfd-datastore::after {
+            bottom: -10px;
+            border-top: none;
+        }
+        .dfd-element {
+            cursor: grab;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        .dfd-element:active {
+            cursor: grabbing;
+            transform: scale(1.05);
+            z-index: 50;
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.1);
+        }
+        .arrow-label {
+            font-size: 0.75rem;
+            fill: #4b5563; /* gray-600 */
+            background-color: rgba(255, 255, 255, 0.7);
+            padding: 0 2px;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 overflow-hidden">
+    <div class="absolute top-0 left-0 p-4 bg-white/80 backdrop-blur-sm rounded-br-xl shadow-lg">
+        <h1 class="text-xl font-bold text-gray-700">Data Pipeline DFD</h1>
+        <p class="text-sm text-gray-500">Google Sheets to Snowflake</p>
+    </div>
+    <div id="canvas" class="relative w-screen h-screen">
+        <!-- DFD Elements will be dynamically positioned -->
+        <div id="E1" class="dfd-element dfd-entity absolute w-48 h-24 rounded-lg p-2 flex flex-col justify-center items-center text-center">
+            <div class="font-bold">Google Sheets</div>
+            <div class="text-xs">(Source)</div>
+        </div>
+        <div id="P1" class="dfd-element dfd-process absolute w-48 h-24 rounded-lg p-2 flex flex-col justify-center items-center text-center">
+            <div class="font-bold">P1: Query & Extract</div>
+            <div class="text-xs">(Google Colab)</div>
+        </div>
+        <div id="P2" class="dfd-element dfd-process absolute w-48 h-24 rounded-lg p-2 flex flex-col justify-center items-center text-center">
+            <div class="font-bold">P2: Load to Staging</div>
+            <div class="text-xs">(Google Colab)</div>
+        </div>
+        <div id="D1" class="dfd-element dfd-datastore absolute w-48 h-24 p-2 flex flex-col justify-center items-center text-center">
+            <div class="font-bold z-10">Bronze Layer</div>
+            <div class="text-xs z-10">(Staging)</div>
+        </div>
+        <div id="P3" class="dfd-element dfd-process absolute w-48 h-24 rounded-lg p-2 flex flex-col justify-center items-center text-center">
+            <div class="font-bold">P3: Transform & Cleanse</div>
+            <div class="text-xs">(Snowflake)</div>
+        </div>
+        <div id="D2" class="dfd-element dfd-datastore absolute w-48 h-24 p-2 flex flex-col justify-center items-center text-center">
+            <div class="font-bold z-10">Silver Layer</div>
+            <div class="text-xs z-10">(Cleansed)</div>
+        </div>
+        <div id="P4" class="dfd-element dfd-process absolute w-48 h-24 rounded-lg p-2 flex flex-col justify-center items-center text-center">
+            <div class="font-bold">P4: Aggregate & Model</div>
+            <div class="text-xs">(Snowflake)</div>
+        </div>
+        <div id="D3" class="dfd-element dfd-datastore absolute w-48 h-24 p-2 flex flex-col justify-center items-center text-center">
+            <div class="font-bold z-10">Gold Layer</div>
+            <div class="text-xs z-10">(Aggregated)</div>
+        </div>
+        <div id="P5" class="dfd-element dfd-process absolute w-48 h-24 rounded-lg p-2 flex flex-col justify-center items-center text-center">
+            <div class="font-bold">P5: Serve Data</div>
+             <div class="text-xs">(BI Tools)</div>
+        </div>
+        <div id="E2" class="dfd-element dfd-entity absolute w-48 h-24 rounded-lg p-2 flex flex-col justify-center items-center text-center">
+            <div class="font-bold">Business Analyst</div>
+            <div class="text-xs">(Destination)</div>
+        </div>
+
+        <!-- SVG for drawing arrows -->
+        <svg id="svg-canvas" class="absolute top-0 left-0 w-full h-full pointer-events-none">
+            <defs>
+                <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto">
+                    <polygon points="0 0, 10 3.5, 0 7" fill="#6b7280" />
+                </marker>
+            </defs>
+        </svg>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const canvas = document.getElementById('canvas');
+            const svg = document.getElementById('svg-canvas');
+            const elements = document.querySelectorAll('.dfd-element');
+
+            // Define the connections between elements
+            const connections = [
+                { from: 'E1', to: 'P1', label: 'Raw Data' },
+                { from: 'P1', to: 'P2', label: 'Raw Extract' },
+                { from: 'P2', to: 'D1', label: 'Staged Raw Data' },
+                { from: 'D1', to: 'P3', label: 'Staged Raw Data' },
+                { from: 'P3', to: 'D2', label: 'Cleansed Data' },
+                { from: 'D2', to: 'P4', label: 'Cleansed Data' },
+                { from: 'P4', to: 'D3', label: 'Aggregated Data' },
+                { from: 'D3', to: 'P5', label: 'Aggregated Data' },
+                { from: 'P5', to: 'E2', label: 'Reports' },
+            ];
+
+            // Initial positioning of elements
+            const positions = {
+                'E1': { top: 50, left: 50 },
+                'P1': { top: 50, left: 300 },
+                'P2': { top: 50, left: 550 },
+                'D1': { top: 200, left: 550 },
+                'P3': { top: 350, left: 550 },
+                'D2': { top: 500, left: 550 },
+                'P4': { top: 650, left: 550 },
+                'D3': { top: 800, left: 550 },
+                'P5': { top: 800, left: 300 },
+                'E2': { top: 800, left: 50 },
+            };
+
+            function setInitialPositions() {
+                const screenWidth = window.innerWidth;
+                const screenHeight = window.innerHeight;
+                const colWidth = screenWidth / 5;
+                const rowHeight = screenHeight / 5;
+
+                positions['E1'] = { top: rowHeight * 2.5, left: colWidth * 0.2 };
+                positions['P1'] = { top: rowHeight * 1, left: colWidth * 1.2 };
+                positions['P2'] = { top: rowHeight * 1, left: colWidth * 2.2 };
+                
+                positions['D1'] = { top: rowHeight * 2, left: colWidth * 2.2 };
+                positions['P3'] = { top: rowHeight * 2, left: colWidth * 3.2 };
+                
+                positions['D2'] = { top: rowHeight * 3, left: colWidth * 3.2 };
+                positions['P4'] = { top: rowHeight * 3, left: colWidth * 2.2 };
+                
+                positions['D3'] = { top: rowHeight * 4, left: colWidth * 2.2 };
+                positions['P5'] = { top: rowHeight * 4, left: colWidth * 1.2 };
+                positions['E2'] = { top: rowHeight * 2.5, left: colWidth * 4.2 };
+
+                // Reposition P5 and E2 to be on the right side
+                positions['P5'] = { top: rowHeight * 2.5, left: colWidth * 3.2 };
+                
+                elements.forEach(el => {
+                    if (positions[el.id]) {
+                        el.style.top = `${positions[el.id].top}px`;
+                        el.style.left = `${positions[el.id].left}px`;
+                    }
+                });
+            }
+
+
+            // Function to draw all arrows
+            function drawArrows() {
+                // Clear existing arrows and labels
+                svg.innerHTML = `
+                    <defs>
+                        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="8" refY="3.5" orient="auto" markerUnits="strokeWidth">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="#6b7280" />
+                        </marker>
+                    </defs>
+                `;
+
+                connections.forEach(conn => {
+                    const fromEl = document.getElementById(conn.from);
+                    const toEl = document.getElementById(conn.to);
+                    if (fromEl && toEl) {
+                        const fromRect = fromEl.getBoundingClientRect();
+                        const toRect = toEl.getBoundingClientRect();
+                        
+                        const points = getConnectorPoints(fromRect, toRect);
+
+                        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                        line.setAttribute('x1', points.x1);
+                        line.setAttribute('y1', points.y1);
+                        line.setAttribute('x2', points.x2);
+                        line.setAttribute('y2', points.y2);
+                        line.setAttribute('stroke', '#9ca3af'); // gray-400
+                        line.setAttribute('stroke-width', '2');
+                        line.setAttribute('marker-end', 'url(#arrowhead)');
+                        svg.appendChild(line);
+
+                        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                        text.setAttribute('x', (points.x1 + points.x2) / 2);
+                        text.setAttribute('y', (points.y1 + points.y2) / 2 - 5);
+                        text.setAttribute('text-anchor', 'middle');
+                        text.classList.add('arrow-label');
+                        text.textContent = conn.label;
+                        svg.appendChild(text);
+                    }
+                });
+            }
+
+            // Calculate the best connection points between two rectangles
+            function getConnectorPoints(rect1, rect2) {
+                const center1 = { x: rect1.left + rect1.width / 2, y: rect1.top + rect1.height / 2 };
+                const center2 = { x: rect2.left + rect2.width / 2, y: rect2.top + rect2.height / 2 };
+
+                const dx = center2.x - center1.x;
+                const dy = center2.y - center1.y;
+
+                let p1, p2;
+
+                if (Math.abs(dx) > Math.abs(dy)) { // More horizontal
+                    p1 = { x: center1.x + Math.sign(dx) * rect1.width / 2, y: center1.y };
+                    p2 = { x: center2.x - Math.sign(dx) * rect2.width / 2, y: center2.y };
+                } else { // More vertical
+                    p1 = { x: center1.x, y: center1.y + Math.sign(dy) * rect1.height / 2 };
+                    p2 = { x: center2.x, y: center2.y - Math.sign(dy) * rect2.height / 2 };
+                }
+                
+                return { x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y };
+            }
+
+
+            // Drag and drop functionality
+            let activeElement = null;
+            let offset = { x: 0, y: 0 };
+
+            elements.forEach(el => {
+                el.addEventListener('mousedown', startDrag);
+                el.addEventListener('touchstart', startDrag, { passive: false });
+            });
+
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('touchmove', drag, { passive: false });
+
+            document.addEventListener('mouseup', endDrag);
+            document.addEventListener('touchend', endDrag);
+
+            function startDrag(e) {
+                e.preventDefault();
+                if (e.target.closest('.dfd-element')) {
+                    activeElement = e.target.closest('.dfd-element');
+                    const event = e.type === 'touchstart' ? e.touches[0] : e;
+                    const rect = activeElement.getBoundingClientRect();
+                    offset.x = event.clientX - rect.left;
+                    offset.y = event.clientY - rect.top;
+                }
+            }
+
+            function drag(e) {
+                if (activeElement) {
+                    e.preventDefault();
+                    const event = e.type === 'touchmove' ? e.touches[0] : e;
+                    let newX = event.clientX - offset.x;
+                    let newY = event.clientY - offset.y;
+
+                    // Constrain to canvas
+                    const canvasRect = canvas.getBoundingClientRect();
+                    newX = Math.max(0, Math.min(newX, canvasRect.width - activeElement.offsetWidth));
+                    newY = Math.max(0, Math.min(newY, canvasRect.height - activeElement.offsetHeight));
+
+                    activeElement.style.left = `${newX}px`;
+                    activeElement.style.top = `${newY}px`;
+                    drawArrows();
+                }
+            }
+
+            function endDrag() {
+                activeElement = null;
+            }
+
+            // Initial setup
+            setInitialPositions();
+            drawArrows();
+
+            // Redraw on window resize
+            window.addEventListener('resize', () => {
+                setInitialPositions();
+                drawArrows();
+            });
+        });
+    </script>
+</body>
+</html>
